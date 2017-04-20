@@ -38,8 +38,6 @@ int main(int argc, char * argv[])
 {
     
     
-    printf("\n=== Black Jack Game ===\n");
-    
     if (argc != 3)
         usage(argv[0]);
     
@@ -58,7 +56,7 @@ int main(int argc, char * argv[])
 
     // Load a sprite to display
     sf::Texture texture;
-    if (!texture.loadFromFile(resourcePath() + "cute_image.jpg")) {
+    if (!texture.loadFromFile(resourcePath() + "space.jpg")) {
         return EXIT_FAILURE;
     }
     sf::Sprite sprite(texture);
@@ -71,14 +69,6 @@ int main(int argc, char * argv[])
     sf::Text text("Hello SFML", font, 50);
     text.setFillColor(sf::Color::Black);
 
-    // Load a music to play
-    sf::Music music;
-    if (!music.openFromFile(resourcePath() + "nice_music.ogg")) {
-        return EXIT_FAILURE;
-    }
-
-    // Play the music
-    music.play();
 
     // Start the game loop
     while (window.isOpen())
