@@ -64,9 +64,17 @@ int main(int argc, char * argv[])
     if (!asteroid.loadFromFile(resourcePath() + "asteroid.png")) {
         return EXIT_FAILURE;
     }
-    sf::Sprite asteroid1(asteroid);
-    asteroid1.setScale(.2, .2);
-    asteroid1.setPosition(450, 450);
+    
+    std::vector<sf::Sprite> asteroidSprites(10, sf::Sprite(asteroid));
+    
+    for(int i = 0; i< 10; i++){
+        asteroidSprites[i].setPosition(450+(i*5), 450+i);
+        asteroidSprites[i].setScale(.2, .2);
+    }
+    
+    //sf::Sprite asteroid1(asteroid);
+    /*asteroid1.setScale(.2, .2);
+    asteroid1.setPosition(450, 450);*/
     
 
     // Load a sprite to display
@@ -119,7 +127,9 @@ int main(int argc, char * argv[])
         
         window.draw(enemySpaceshipSprite);
         window.draw(spaceshipSprite);
-        window.draw(asteroid1);
+        for(int i = 0; i< 10; i++){
+         window.draw(asteroidSprites[i]);
+        }
         
         
         if(sf::Keyboard::isKeyPressed(sf::Keyboard::Right)){
