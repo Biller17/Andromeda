@@ -18,15 +18,22 @@ void usage(char * program);
 void connectToServer(char * address, char * port);
 void communicationLoop(int connection_fd);
 
+//global variables
+float spaceshipPosY = 600;
+float spaceshipPosX = 100;
+float enemySpaceshipPosX = 100;
+float asteroids [10];
+
+
 int main(int argc, char * argv[])
 {
-    float spaceshipPosY = 550;
-    float spaceshipPosX = 500;
+    float spaceshipVel = 2;
+    
    // connectToServer("255.255.255.255", "80");
     
     
     // Create the main window
-    sf::RenderWindow window(sf::VideoMode(1000, 600), "SFML window");
+    sf::RenderWindow window(sf::VideoMode(1200, 900), "Andromeda");
 
     // Set the Icon
     /*sf::Image icon;
@@ -42,6 +49,24 @@ int main(int argc, char * argv[])
         return EXIT_FAILURE;
     }
     sf::Sprite spaceshipSprite(spaceship);
+    spaceshipSprite.setScale(.5, .5);
+    spaceshipSprite.setPosition(spaceshipPosX, spaceshipPosY);
+    
+    sf::Texture enemySpaceship;
+    if (!enemySpaceship.loadFromFile(resourcePath() + "enemySpaceship.png")) {
+        return EXIT_FAILURE;
+    }
+    sf::Sprite enemySpaceshipSprite(enemySpaceship);
+    enemySpaceshipSprite.setScale(.5, .5);
+    enemySpaceshipSprite.setPosition(spaceshipPosX, -0);
+    
+    sf::Texture asteroid;
+    if (!asteroid.loadFromFile(resourcePath() + "asteroid.png")) {
+        return EXIT_FAILURE;
+    }
+    sf::Sprite asteroid1(asteroid);
+    asteroid1.setScale(.2, .2);
+    asteroid1.setPosition(450, 450);
     
 
     // Load a sprite to display
@@ -49,6 +74,7 @@ int main(int argc, char * argv[])
     if (!texture.loadFromFile(resourcePath() + "space.jpg")) {
         return EXIT_FAILURE;
     }
+    
     sf::Sprite sprite(texture);
 
     // Create a graphical text to display
@@ -56,8 +82,15 @@ int main(int argc, char * argv[])
     if (!font.loadFromFile(resourcePath() + "sansation.ttf")) {
         return EXIT_FAILURE;
     }
-    sf::Text text("Hello SFML", font, 50);
-    text.setFillColor(sf::Color::Black);
+    //set enemy score
+    sf::Text enemyScore("Score: ", font, 25);
+    enemyScore.setFillColor(sf::Color::Red);
+    
+    
+    //set user score
+    sf::Text userScore("Score: ", font, 25);
+    userScore.setPosition(0, 725);
+    userScore.setFillColor(sf::Color::White);
 
 
     // Start the game loop
@@ -84,14 +117,23 @@ int main(int argc, char * argv[])
         // Draw the sprite
         window.draw(sprite);
         
+        window.draw(enemySpaceshipSprite);
         window.draw(spaceshipSprite);
+        window.draw(asteroid1);
         
-        spaceshipSprite.setPosition(spaceshipPosX, spaceshipPosY);
-    
+        
+        if(sf::Keyboard::isKeyPressed(sf::Keyboard::Right)){
+            spaceshipSprite.move(spaceshipVel, 0);
+        }
+        else if(sf::Keyboard::isKeyPressed(sf::Keyboard::Left)){
+            spaceshipSprite.move(-spaceshipVel, 0);
+        }
+        
+        
         
         // Draw the string
-        window.draw(text);
-
+        window.draw(userScore);
+        window.draw(enemyScore);
         // Update the window
         window.display();
     }
@@ -164,39 +206,31 @@ void connectToServer(char * address, char * port)
 
 void communicationLoop(int connection_fd)
 {
-    char buffer[BUFFER_SIZE];
     
     while (1)
     {
-        printf("Enter a message for the server (empty message to finish): ");
-        fgets(buffer, BUFFER_SIZE, stdin);
-        
-        // Finish the connection with a string containing only the '\n'
-        if (strlen(buffer) == 1)
-        {
-            printf("Finishing the connection\n");
-            break;
-        }
-        
-        ///// SEND
-        // Send a reply to the client
-        if ( send(connection_fd, buffer, strlen(buffer)+1, 0) == -1 )
-        {
-            perror("ERROR: send");
-            exit(EXIT_FAILURE);
-        }
-        
-        // Clear the buffer
-        bzero(buffer, BUFFER_SIZE);
-        
-        ///// RECV
-        // Read the request from the client
-        if ( recv(connection_fd, buffer, BUFFER_SIZE, 0) == -1 )
+        if(read(connection_fd, &spaceshipPosX , sizeof(float)) == -1)
         {
             perror("ERROR: recv");
             exit(EXIT_FAILURE);
         }
-        printf("The server replied with: %s\n", buffer);
+        
+        if(write(connection_fd, &enemySpaceshipPosX, sizeof(float)) == -1)
+        {
+            perror("ERROR: write");
+            exit(EXIT_FAILURE);
+        }
+        
+        if(write(connection_fd, &asteroids, sizeof(float)) == -1)
+        {
+            perror("ERROR: write");
+            exit(EXIT_FAILURE);
+        }
+        
+        
+        
+        
+        
     }
 }
 
